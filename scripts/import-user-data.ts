@@ -4,8 +4,9 @@
 //   npm run import -- --file ../wealth/data.json --email radamuz16@gmail.com
 //   npm run import -- --file ../wealth/data.json --email x@y.com --dry-run
 //
-// Requiere credenciales AWS con permisos de datos sobre la tabla:
-//   AWS_PROFILE=radamuz AWS_REGION=eu-west-1 DYNAMODB_TABLE=wealth-data
+// Requiere credenciales AWS con permisos de datos sobre la tabla. Sirve
+// cualquier forma que entienda el SDK; lo habitual es el perfil:
+//   AWS_PROFILE=radamuz AWS_REGION=eu-west-1 DYNAMODB_TABLE=wealth-data npm run import -- …
 //
 // Lo que hace:
 //   1. Valida el fichero con el mismo esquema zod que usa la API.
@@ -20,7 +21,7 @@ import { z } from "zod";
 import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 // Imports relativos, no con el alias "@/": este script lo ejecuta tsx directo,
 // fuera del resolutor de Next.
-import { KEYS, TABLE_NAME, getDocClient, isDynamoEnabled, snapshotSk, userPk } from "../lib/dynamo";
+import { KEYS, TABLE_NAME, getDocClient, snapshotSk, userPk } from "../lib/dynamo";
 import { assetClassSchema, groupsSchema, snapshotSchema, type Group } from "../lib/types";
 import { assetClassOf } from "../lib/utils";
 import { normalizeEmail } from "../lib/auth";
@@ -152,14 +153,10 @@ async function main() {
     return;
   }
 
-  if (!isDynamoEnabled()) {
-    console.error(
-      "error: faltan AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY. Exporta el perfil, p. ej.:\n" +
-        "  AWS_PROFILE=radamuz  (con credenciales resueltas) o exporta las claves directamente.",
-    );
-    process.exit(1);
-  }
-
+  // A diferencia de la app (que cae a memoria sin credenciales), aquí escribir
+  // en DynamoDB es todo el propósito: nunca se usa el modo memoria. Se deja que
+  // el SDK resuelva las credenciales por su cadena habitual —AWS_PROFILE,
+  // ~/.aws/credentials, variables de entorno— en vez de exigir claves sueltas.
   if (!args.force && (await hasData(userId))) {
     console.error(
       `error: ${userId} ya tiene datos en la tabla. Revísalos antes de sobrescribir, o usa --force.`,

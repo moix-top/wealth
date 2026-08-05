@@ -107,18 +107,18 @@ Necesitas `aws` y `gh` instalados y autenticados.
 # 3. Usuario IAM de runtime + imprime las variables para Vercel
 ./scripts/setup-aws.sh --profile radamuz
 
-# 4. Migra tus datos actuales (primero en seco)
-npm run import -- \
+# 4. Migra tus datos actuales (primero en seco, que no escribe nada)
+AWS_PROFILE=radamuz npm run import -- \
   --file /LINUXDATA/repos/github.com/radamuz/wealth/data.json \
   --email radamuz16@gmail.com \
   --overrides scripts/asset-classes.example.json \
   --dry-run
-# revisa el listado y el total (95.565,47 €), y entonces sin --dry-run
+# revisa el listado y el total (95.565,47 €), y repite sin --dry-run
 ```
 
-Para el paso 4 el script necesita credenciales con permisos de datos: exporta
-las del usuario `wealth-data-vercel` que imprime `setup-aws.sh`, o ponlas en
-`.env.local`.
+El import resuelve las credenciales por la cadena habitual del SDK, así que
+`AWS_PROFILE=radamuz` basta. También valen las claves del usuario
+`wealth-data-vercel` exportadas o puestas en `.env.local`.
 
 **Tres usuarios IAM con permisos separados**, a propósito:
 
