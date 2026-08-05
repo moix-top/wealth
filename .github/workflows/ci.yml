@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Los tests corren en modo memoria: sin credenciales de AWS ni de Google.
+      - run: npm test
+
+      # El build no necesita secretos reales, pero Auth.js sí necesita que las
+      # variables existan. Valores dummy: no se usan en ninguna petición.
+      - run: npm run build
+        env:
+          AUTH_SECRET: dummy-secret-for-build-only
+          AUTH_GOOGLE_ID: dummy
+          AUTH_GOOGLE_SECRET: dummy
+          AUTH_TRUST_HOST: 'true'

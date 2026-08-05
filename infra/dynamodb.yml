@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Tabla DynamoDB de wealth (finanzas personales multiusuario, single-table design).
+
+Parameters:
+  TableName:
+    Type: String
+    Default: wealth-data
+    Description: Nombre de la tabla DynamoDB.
+
+Resources:
+  WealthTable:
+    Type: AWS::DynamoDB::Table
+    # Retain: borrar el stack nunca borra los datos financieros.
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Ref TableName
+      # Protección de borrado: la tabla no se puede eliminar (ni por API ni por
+      # consola) sin desactivar esto antes. Complementa a DeletionPolicy: Retain.
+      DeletionProtectionEnabled: true
+      # Single-table design. La pk es el usuario (USER#<email>) y el prefijo de
+      # la sk discrimina la entidad (PROFILE, PORTFOLIO, SNAPSHOT#<fecha>#<id>).
+      # Que el usuario sea la partición es lo que hace imposible que una consulta
+      # roce datos de otra persona. PAY_PER_REQUEST = coste 0 sin tráfico.
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      # Sin GSI: todos los accesos son por pk conocida (el usuario de la sesión).
+      # No hay ningún patrón de consulta transversal, y no debería haberlo.
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        # Cifrado en reposo con clave gestionada por DynamoDB. Son datos
+        # financieros personales: se deja explícito, no por defecto implícito.
+        SSEEnabled: true
+
+Outputs:
+  TableName:
+    Description: Nombre de la tabla (ponlo como DYNAMODB_TABLE en Vercel).
+    Value: !Ref WealthTable
+    Export:
+      Name: !Sub '${AWS::StackName}-TableName'
+  TableArn:
+    Description: ARN de la tabla (para acotar la política IAM).
+    Value: !GetAtt WealthTable.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-TableArn'
