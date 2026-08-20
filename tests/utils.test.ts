@@ -42,6 +42,7 @@ describe("assetClassOf", () => {
     expect(assetClassOf({ name: "ETF Vanguard S&P 500" })).toBe("rv");
     expect(assetClassOf({ name: "Cuenta Nómina" })).toBe("liquidez_sin");
     expect(assetClassOf({ name: "Cuenta Ahorro Remunerada" })).toBe("liquidez");
+    expect(assetClassOf({ name: "Efectivo en casa" })).toBe("efectivo");
     expect(assetClassOf({ name: "Fidelity Physical Bitcoin" })).toBe("cripto");
   });
 

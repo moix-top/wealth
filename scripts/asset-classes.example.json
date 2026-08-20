@@ -1,5 +1,5 @@
 {
-  "_comment": "Correcciones de clase de activo para el import: nombre de subgrupo → clase. Solo hace falta para lo que la heurística por nombre no puede saber (un fondo mixto o una acción concreta no se distinguen por el nombre). Clases válidas: liquidez (remunerado), liquidez_sin (sin remunerar), monetario, rf, mixto, rv, cripto, seguro, inmueble, bien, otro. Copia este fichero, quita el _comment y ajústalo a tus partidas.",
+  "_comment": "Correcciones de clase de activo para el import: nombre de subgrupo → clase. Solo hace falta para lo que la heurística por nombre no puede saber (un fondo mixto o una acción concreta no se distinguen por el nombre). Clases válidas: liquidez (remunerado), liquidez_sin (sin remunerar), efectivo, monetario, rf, mixto, rv, cripto, seguro, inmueble, bien, otro. Copia este fichero, quita el _comment y ajústalo a tus partidas.",
   "Cartesio X, Fi": "mixto",
   "Telefónica": "rv",
   "Euro": "liquidez_sin",

@@ -52,17 +52,18 @@ export const snapshotValue = (snap: Snapshot | undefined, id: string): number =>
 
 // --- Clases de activo ---
 export const ASSET_CLASSES: Record<AssetClassKey, { label: string; color: string }> = {
-  liquidez:     { label: "Liquidez remunerado",   color: "#2a78d6" },
+  liquidez:     { label: "Liquidez remunerado",    color: "#2a78d6" },
   liquidez_sin: { label: "Liquidez sin remunerar", color: "#7fb2ea" },
-  monetario:    { label: "Monetario",       color: "#1baf7a" },
-  rf:           { label: "Renta fija",      color: "#eda100" },
-  mixto:        { label: "Mixto",           color: "#008300" },
-  rv:           { label: "Renta variable",  color: "#4a3aa7" },
-  cripto:       { label: "Cripto",          color: "#e34948" },
-  seguro:       { label: "Seguro / PIAS",   color: "#e87ba4" },
-  inmueble:     { label: "Inmueble",        color: "#eb6834" },
-  bien:         { label: "Bien / vehículo", color: "#256abf" },
-  otro:         { label: "Otro",            color: "#898781" },
+  efectivo:     { label: "Efectivo",               color: "#5aa02c" },
+  monetario:    { label: "Monetario",              color: "#1baf7a" },
+  rf:           { label: "Renta fija",             color: "#eda100" },
+  mixto:        { label: "Mixto",                  color: "#008300" },
+  rv:           { label: "Renta variable",         color: "#4a3aa7" },
+  cripto:       { label: "Cripto",                 color: "#e34948" },
+  seguro:       { label: "Seguro / PIAS",          color: "#e87ba4" },
+  inmueble:     { label: "Inmueble",               color: "#eb6834" },
+  bien:         { label: "Bien / vehículo",        color: "#256abf" },
+  otro:         { label: "Otro",                   color: "#898781" },
 };
 export const ASSET_ORDER = [...ASSET_CLASS_KEYS];
 
@@ -77,7 +78,8 @@ export const ASSET_ORDER = [...ASSET_CLASS_KEYS];
  */
 const DEFAULTS: Array<[RegExp, AssetClassKey]> = [
   [/remunerad|ahorro/i, "liquidez"],
-  [/efectivo|billetes|cuenta|corriente|nómina|nomina|liquidez|cash/i, "liquidez_sin"],
+  [/efectivo|billetes|metálico|metalico|cash/i, "efectivo"],
+  [/cuenta|corriente|nómina|nomina|liquidez/i, "liquidez_sin"],
   [/monetari|money market|tresorerie/i, "monetario"],
   [/renta fija|bono|bonos|deuda|letra/i, "rf"],
   [/mixto|balanced/i, "mixto"],

@@ -7,6 +7,7 @@ import { z } from "zod";
 export const ASSET_CLASS_KEYS = [
   "liquidez",
   "liquidez_sin",
+  "efectivo",
   "monetario",
   "rf",
   "mixto",
