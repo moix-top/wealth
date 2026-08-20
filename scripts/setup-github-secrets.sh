@@ -62,6 +62,7 @@ POLICY_DOC=$(cat <<JSON
       "Effect": "Allow",
       "Action": ["dynamodb:CreateTable", "dynamodb:UpdateTable", "dynamodb:DescribeTable",
                  "dynamodb:UpdateContinuousBackups", "dynamodb:DescribeContinuousBackups",
+                 "dynamodb:UpdateTimeToLive", "dynamodb:DescribeTimeToLive",
                  "dynamodb:TagResource", "dynamodb:ListTagsOfResource"],
       "Resource": "arn:aws:dynamodb:$REGION:$ACCOUNT_ID:table/$STACK_NAME*"
     }

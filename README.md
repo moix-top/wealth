@@ -128,6 +128,19 @@ El import resuelve las credenciales por la cadena habitual del SDK, así que
 | `wealth-data-vercel` (la app) | leer/escribir datos de la tabla | tocar la infraestructura |
 | tu perfil `radamuz` | todo (solo desde tu máquina) | — |
 
+Los permisos de `wealth-data-deploy` están acotados verbo a verbo, así que
+**cada propiedad nueva en `infra/dynamodb.yml` puede exigir una acción IAM
+nueva**. Si no se añade antes, el despliegue falla con `AccessDenied` sobre esa
+acción concreta (pasó al añadir `TimeToLiveSpecification`, que necesita
+`dynamodb:UpdateTimeToLive`). Para actualizar solo la política, sin rotar
+credenciales ni resubir secretos:
+
+```bash
+./scripts/update-deploy-policy.sh --profile radamuz
+```
+
+Y después relanza el workflow *Deploy infra (DynamoDB)*.
+
 ### C. Secretos en GitHub
 
 Los pone `setup-github-secrets.sh`. Comprueba en
