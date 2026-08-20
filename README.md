@@ -4,7 +4,12 @@ Control de finanzas personales multiusuario: patrimonio por grupos y subgrupos,
 distribución por clase de activo, snapshots del histórico, comparativa entre dos
 momentos y gráfico de evolución.
 
-Cada persona entra con su cuenta de Google y ve **solo sus datos**.
+Cada persona entra con su cuenta de Google y ve **solo sus datos**. También se
+puede probar sin cuenta desde el **modo demo** de la pantalla de acceso.
+
+> Antes de tocar código, lee [CLAUDE.md](CLAUDE.md): reúne las invariantes que no
+> se pueden romper (aislamiento de datos, Edge Runtime, permisos IAM) y las
+> convenciones del proyecto.
 
 - **Stack**: Next.js 14 (App Router, TypeScript) · Auth.js v5 con Google ·
   DynamoDB (single-table) · Recharts
