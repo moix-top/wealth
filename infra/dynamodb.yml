@@ -35,6 +35,12 @@ Resources:
           KeyType: RANGE
       # Sin GSI: todos los accesos son por pk conocida (el usuario de la sesión).
       # No hay ningún patrón de consulta transversal, y no debería haberlo.
+      # Las particiones del modo demo son desechables y se crean una por visita:
+      # llevan un atributo `ttl` (24 h) y DynamoDB las borra solo. Los ítems de
+      # usuarios reales no llevan ese atributo, así que no caducan nunca.
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
       SSESpecification:

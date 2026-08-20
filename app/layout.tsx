@@ -5,9 +5,22 @@ import "./globals.css";
 // haría fallar el build cuando no hay variables AUTH_* definidas (CI).
 export const dynamic = "force-dynamic";
 
+const DESCRIPTION =
+  "Control de finanzas personales: patrimonio por grupos, clases de activo y evolución.";
+
+// Los iconos NO se declaran aquí: el App Router los sirve por convención de
+// fichero (app/icon.svg, app/icon.png, app/apple-icon.png) y esa convención
+// tiene precedencia sobre metadata.icons, así que declararlos sería ruido.
 export const metadata: Metadata = {
   title: "Mi Patrimonio",
-  description: "Control de finanzas personales: patrimonio por grupos, clases de activo y evolución.",
+  description: DESCRIPTION,
+  applicationName: "Mi Patrimonio",
+  openGraph: {
+    title: "Mi Patrimonio",
+    description: DESCRIPTION,
+    type: "website",
+    locale: "es_ES",
+  },
 };
 
 // `viewport-fit: cover` hace falta para que env(safe-area-inset-*) tenga valor

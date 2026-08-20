@@ -26,6 +26,7 @@ import {
   snapshotSk,
   userPk,
 } from "@/lib/dynamo";
+import { isDemoUserId } from "@/lib/demo/profiles";
 import { httpError } from "@/lib/http";
 import type { Group, Portfolio, Snapshot, StorageInfo, WealthData } from "@/lib/types";
 
@@ -52,6 +53,24 @@ const memPartition = (pk: string): Map<string, MemoryItem> => {
 export function resetMemory(): void {
   memory.clear();
 }
+
+// ── Caducidad de las particiones de demostración ─────────────────────────────
+// Cada visita en modo demo crea una partición nueva y desechable. Sin esto la
+// tabla crecería sin límite, y no hay forma de barrerlas (no hay Scan, ni GSI,
+// y no debe haberlos). El atributo `ttl` deja que DynamoDB las borre solo; ver
+// TimeToLiveSpecification en infra/dynamodb.yml. En modo memoria sobra: se
+// pierde al reiniciar el proceso.
+const DEMO_TTL_SECONDS = 24 * 3600;
+
+/** Epoch de caducidad si el usuario es de demo; undefined para los reales. */
+const demoTtl = (userId: string): number | undefined =>
+  isDemoUserId(userId) ? Math.floor(Date.now() / 1000) + DEMO_TTL_SECONDS : undefined;
+
+/** Añade `ttl` solo cuando toca, para no ensuciar los ítems de usuarios reales. */
+const withTtl = <T extends object>(userId: string, item: T): T => {
+  const ttl = demoTtl(userId);
+  return ttl === undefined ? item : { ...item, ttl };
+};
 
 // ── Perfil / alta ────────────────────────────────────────────────────────────
 
@@ -84,7 +103,7 @@ export async function ensureUser(userId: string, googleSub?: string): Promise<Pr
   }
 
   const profile: Profile = { email: userId, googleSub, createdAt: now, updatedAt: now };
-  const item = { pk: userPk(userId), sk: KEYS.PROFILE, ...profile };
+  const item = withTtl(userId, { pk: userPk(userId), sk: KEYS.PROFILE, ...profile });
 
   if (!isDynamoEnabled()) {
     memPartition(item.pk).set(item.sk, item as MemoryItem);
@@ -175,18 +194,28 @@ export async function savePortfolio(
   }
 
   const nextVersion = (expectedVersion ?? (await getPortfolio(userId)).version) + 1;
+  // La cartera se escribe con Update, no con Put, así que el ttl hay que
+  // renovarlo aquí: si no, el perfil y los snapshots caducarían y la cartera se
+  // quedaría huérfana en la tabla.
+  const ttl = demoTtl(userId);
 
   try {
     await getDocClient().send(
       new UpdateCommand({
         TableName: TABLE_NAME,
         Key: { pk, sk: KEYS.PORTFOLIO },
-        UpdateExpression: "SET #g = :g, #v = :v, #u = :u",
-        ExpressionAttributeNames: { "#g": "groups", "#v": "version", "#u": "updatedAt" },
+        UpdateExpression: `SET #g = :g, #v = :v, #u = :u${ttl === undefined ? "" : ", #t = :t"}`,
+        ExpressionAttributeNames: {
+          "#g": "groups",
+          "#v": "version",
+          "#u": "updatedAt",
+          ...(ttl === undefined ? {} : { "#t": "ttl" }),
+        },
         ExpressionAttributeValues: {
           ":g": groups,
           ":v": nextVersion,
           ":u": now,
+          ...(ttl === undefined ? {} : { ":t": ttl }),
           ...(expectedVersion !== undefined ? { ":expected": expectedVersion } : {}),
         },
         ...(expectedVersion !== undefined
@@ -285,7 +314,7 @@ export async function createSnapshot(
   };
   const sk = snapshotSk(date, id);
   // El ítem se construye campo a campo: nada del body puede colarse como pk/sk.
-  const item = { pk, sk, ...snapshot, createdAt: date };
+  const item = withTtl(userId, { pk, sk, ...snapshot, createdAt: date });
 
   if (!isDynamoEnabled()) {
     memPartition(pk).set(sk, item as MemoryItem);

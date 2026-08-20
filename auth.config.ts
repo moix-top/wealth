@@ -6,7 +6,9 @@
 // "Module not found". Solo next-auth y lógica pura.
 
 import type { NextAuthConfig } from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import { demoEmail, findDemoProfile } from "@/lib/demo/profiles";
 
 // El perfil de Google trae email_verified, pero el tipo `Profile` de Auth.js no
 // lo declara (es específico de cada proveedor). Cast acotado en vez de `any`.
@@ -27,6 +29,26 @@ export const authConfig: NextAuthConfig = {
       // la misma cuenta y no hay forma de cambiarla.
       authorization: { params: { prompt: "select_account" } },
     }),
+
+    // Modo demo. Credentials es el único proveedor que exige sesión JWT, que es
+    // justo la que ya usamos. No valida contraseña alguna: lo único que acepta
+    // es un id del catálogo, y a cambio entrega una identidad desechable.
+    //
+    // El nonce es lo que hace que cada visitante trabaje sobre SU copia: el
+    // email es la clave de partición (lib/auth.ts), así que dos personas en el
+    // mismo perfil no se pisan.
+    Credentials({
+      id: "demo",
+      name: "Modo demo",
+      credentials: { profileId: { label: "Perfil", type: "text" } },
+      authorize(credentials) {
+        const profile = findDemoProfile(String(credentials?.profileId ?? ""));
+        if (!profile) return null;
+        const nonce = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+        const email = demoEmail(profile.id, nonce);
+        return { id: email, email, name: profile.name };
+      },
+    }),
   ],
 
   // Sesión en JWT firmado, sin adaptador de base de datos: los datos del
@@ -44,7 +66,10 @@ export const authConfig: NextAuthConfig = {
     // innegociable es que el email esté verificado: el email es la clave de
     // partición en DynamoDB, así que aceptar uno sin verificar permitiría
     // reclamar los datos de otra persona con solo declarar su dirección.
-    signIn({ profile }) {
+    signIn({ account, profile }) {
+      // El proveedor demo no trae `profile`: sin esta salida temprana caería en
+      // la comprobación de Google y se rechazaría como "no-email".
+      if (account?.provider === "demo") return true;
       const google = profile as GoogleProfile | undefined;
       if (!google?.email) return "/login?error=no-email";
       return google.email_verified === true ? true : "/login?error=email-not-verified";
@@ -52,14 +77,20 @@ export const authConfig: NextAuthConfig = {
 
     // El `sub` de Google se arrastra en el token para poder detectar en el
     // servidor si un email dado cambia de cuenta de origen (ver ensureUser).
-    jwt({ token, profile }) {
+    jwt({ token, account, profile }) {
       const google = profile as GoogleProfile | undefined;
       if (google?.sub) token.googleSub = google.sub;
+      // El flag va en el token, no se deduce del email en el cliente: así la UI
+      // no tiene que conocer el formato del identificador demo.
+      if (account?.provider === "demo") token.demo = true;
       return token;
     },
 
     session({ session, token }) {
-      if (session.user) session.user.googleSub = token.googleSub as string | undefined;
+      if (session.user) {
+        session.user.googleSub = token.googleSub as string | undefined;
+        session.user.demo = token.demo === true;
+      }
       return session;
     },
 

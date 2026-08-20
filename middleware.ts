@@ -12,6 +12,9 @@ export default NextAuth(authConfig).auth;
 
 export const config = {
   // Todo salvo: los propios endpoints de Auth.js (si no, bucle de redirects),
-  // la pantalla de login, los estáticos de Next y el favicon.
-  matcher: ["/((?!api/auth|login|_next/static|_next/image|favicon.ico).*)"],
+  // la pantalla de login, los estáticos de Next y los iconos de la app. Los
+  // iconos tienen que quedar fuera aposta: los pide el navegador SIN sesión, en
+  // la propia pantalla de login, y si el middleware los redirige a /login la
+  // pestaña se queda sin icono.
+  matcher: ["/((?!api/auth|login|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png).*)"],
 };

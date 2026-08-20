@@ -39,7 +39,13 @@ export default function WealthApp({ signOutAction }: { signOutAction: () => Prom
         <TabNav tab={tab} onSelect={setTab} variant="tabs" />
         <div className="session">
           {store.saving && <span className="saving">Guardando…</span>}
-          {store.user && <span className="session-email">{store.user.email}</span>}
+          {store.user && (
+            // En demo el email es sintético ("demo+perfil+nonce@…"): no aporta
+            // nada y encima queda feo. Se muestra el nombre del personaje.
+            <span className="session-email">
+              {store.user.demo ? store.user.name : store.user.email}
+            </span>
+          )}
           <ThemeToggle />
           <form action={signOutAction}>
             <button className="btn ghost sm" type="submit">
@@ -48,6 +54,18 @@ export default function WealthApp({ signOutAction }: { signOutAction: () => Prom
           </form>
         </div>
       </header>
+
+      {store.user?.demo && (
+        <div className="banner demo">
+          <span>
+            <strong>Modo demo.</strong> Datos ficticios sobre productos financieros reales. Puedes
+            editarlo todo: es tu copia y se descarta al salir.
+          </span>
+          <a className="btn sm" href="/api/auth/signout">
+            Entrar con mi cuenta
+          </a>
+        </div>
+      )}
 
       {/* Antes un fallo al guardar no se veía en ninguna parte. */}
       {store.error && <div className="banner error">{store.error}</div>}

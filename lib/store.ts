@@ -23,6 +23,10 @@ export interface SessionInfo {
   email: string;
   name?: string | null;
   image?: string | null;
+  /** Sesión de demostración: datos ficticios que se descartan al salir. */
+  demo?: boolean;
+  /** Id del perfil del catálogo con el que se entró. */
+  demoProfile?: string;
 }
 
 export interface WealthStore {
