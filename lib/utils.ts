@@ -9,14 +9,22 @@ export const fmt = (n: number | undefined | null): string =>
     currency: "EUR",
   }).format(n || 0);
 
-export const fmtDate = (iso: string): string =>
-  new Date(iso).toLocaleString("es-ES", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+// `short` omite la hora y acorta el año: en móvil la fecha completa
+// ("06/08/2025, 00:21") no cabe en la tabla del histórico.
+export const fmtDate = (iso: string, short = false): string =>
+  new Date(iso).toLocaleString(
+    "es-ES",
+    short
+      ? { day: "2-digit", month: "2-digit", year: "2-digit" }
+      : { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" },
+  );
+
+/** Importe abreviado para ejes de gráfico, donde no cabe el formato completo. */
+export const fmtCompact = (n: number): string =>
+  new Intl.NumberFormat("es-ES", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(n || 0);
 
 export const fmtSign = (n: number): string =>
   (n > 0 ? "+" : "") +

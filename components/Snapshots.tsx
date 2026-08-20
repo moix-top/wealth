@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { fmt, fmtDate, fmtSign, groupTotal, snapshotTotal } from "@/lib/utils";
+import { useIsMobile } from "@/lib/useMediaQuery";
 import type { WealthStore } from "@/lib/store";
 
 export default function Snapshots({ store }: { store: WealthStore }) {
   const { groups, snapshots } = store.data!;
   const [label, setLabel] = useState("");
+  const mobile = useIsMobile();
 
   const allSubIds = groups.flatMap((g) => g.subgroups.map((s) => s.id));
   const currentTotal = groups.reduce((a, g) => a + groupTotal(g), 0);
@@ -44,13 +46,16 @@ export default function Snapshots({ store }: { store: WealthStore }) {
 
       <div className="card">
         <h3>Histórico ({ordered.length})</h3>
+        {/* Si aun así no cabe (importes muy largos), se desplaza dentro de la
+            tarjeta en lugar de desbordar la página entera. */}
+        <div className="table-scroll">
         <table className="hist-table">
           <thead>
             <tr>
               <th>Fecha</th>
               <th>Etiqueta</th>
               <th className="num">Total</th>
-              <th className="num">Δ vs anterior</th>
+              <th className="num">{mobile ? "Δ" : "Δ vs anterior"}</th>
               <th></th>
             </tr>
           </thead>
@@ -61,10 +66,11 @@ export default function Snapshots({ store }: { store: WealthStore }) {
               const delta = prev ? total - snapshotTotal(prev, allSubIds) : null;
               return (
                 <tr key={snap.id}>
-                  <td>{fmtDate(snap.date)}</td>
+                  <td className="nowrap">{fmtDate(snap.date, mobile)}</td>
                   <td>
                     <input
                       className="input flush"
+                      aria-label="Etiqueta del snapshot"
                       defaultValue={snap.label}
                       onBlur={(e) => {
                         const v = e.target.value.trim();
@@ -83,6 +89,7 @@ export default function Snapshots({ store }: { store: WealthStore }) {
                   <td className="num">
                     <button
                       className="btn danger ghost sm"
+                      aria-label="Eliminar snapshot"
                       onClick={() => {
                         if (confirm("¿Eliminar este snapshot?")) store.removeSnapshot(snap.id);
                       }}
@@ -95,6 +102,7 @@ export default function Snapshots({ store }: { store: WealthStore }) {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

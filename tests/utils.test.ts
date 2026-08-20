@@ -2,7 +2,7 @@
 // cifras que ve el usuario cambian.
 
 import { describe, expect, it } from "vitest";
-import { assetClassOf, groupTotal, pct, snapshotTotal } from "@/lib/utils";
+import { assetClassOf, fmtCompact, fmtDate, groupTotal, pct, snapshotTotal } from "@/lib/utils";
 import { savePortfolioSchema, snapshotSchema } from "@/lib/types";
 
 describe("totales", () => {
@@ -30,6 +30,20 @@ describe("totales", () => {
     expect(pct(0, 50)).toBe(100);
     expect(pct(0, 0)).toBe(0);
     expect(pct(100, 150)).toBe(50);
+  });
+});
+
+describe("formato para pantallas estrechas", () => {
+  it("fmtDate corto omite la hora y acorta el año", () => {
+    const iso = "2025-08-06T10:21:00.000Z";
+    expect(fmtDate(iso, true)).toBe("06/08/25");
+    // El formato largo por defecto no cambia.
+    expect(fmtDate(iso)).toContain("06/08/2025");
+  });
+
+  it("fmtCompact abrevia los importes de los ejes", () => {
+    expect(fmtCompact(1_200_000)).toMatch(/1,2\s?M/);
+    expect(fmtCompact(0)).toBe("0");
   });
 });
 

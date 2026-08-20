@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { fmt, colorFor, groupTotal } from "@/lib/utils";
+import { useIsMobile } from "@/lib/useMediaQuery";
 import type { WealthStore } from "@/lib/store";
 
 export const tooltipStyle = {
@@ -11,7 +12,16 @@ export const tooltipStyle = {
   borderRadius: 10,
   color: "var(--text-primary)",
   fontSize: 13,
+  boxShadow: "var(--shadow)",
+  padding: "0.5rem 0.7rem",
 };
+
+// El total del centro del donut es un overlay HTML posterior en el DOM, así que
+// sin z-index tapaba al tooltip cuando este caía sobre el agujero.
+export const tooltipWrapperStyle = { zIndex: 30, pointerEvents: "none" as const };
+
+/** Alto del donut: el fijo de escritorio no cabe en un móvil. */
+export const donutHeight = (mobile: boolean) => (mobile ? 260 : 360);
 
 interface Slice {
   id?: string;
@@ -23,6 +33,7 @@ interface Slice {
 export default function Dashboard({ store }: { store: WealthStore }) {
   const { groups } = store.data!;
   const [drill, setDrill] = useState<string | null>(null); // groupId o null
+  const mobile = useIsMobile();
 
   const total = useMemo(() => groups.reduce((a, g) => a + groupTotal(g), 0), [groups]);
 
@@ -60,14 +71,14 @@ export default function Dashboard({ store }: { store: WealthStore }) {
           )}
         </div>
         <div className="donut-wrap">
-          <ResponsiveContainer width="100%" height={360}>
+          <ResponsiveContainer width="100%" height={donutHeight(mobile)}>
             <PieChart>
               <Pie
                 data={slices}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={95}
-                outerRadius={140}
+                innerRadius="62%"
+                outerRadius="92%"
                 paddingAngle={2}
                 stroke="var(--surface-1)"
                 strokeWidth={2}
@@ -82,6 +93,8 @@ export default function Dashboard({ store }: { store: WealthStore }) {
               <Tooltip
                 formatter={(v: number, n: string) => [fmt(v), n]}
                 contentStyle={tooltipStyle}
+                wrapperStyle={tooltipWrapperStyle}
+                allowEscapeViewBox={{ x: false, y: true }}
               />
             </PieChart>
           </ResponsiveContainer>

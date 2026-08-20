@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { fmt, fmtSign, fmtDate, pct, colorFor, snapshotValue as val } from "@/lib/utils";
+import { useIsMobile } from "@/lib/useMediaQuery";
 import type { Group } from "@/lib/types";
 import type { WealthStore } from "@/lib/store";
 
 export default function Compare({ store }: { store: WealthStore }) {
   const { groups, snapshots } = store.data!;
+  const mobile = useIsMobile();
 
   const ordered = useMemo(
     () => [...snapshots].sort((a, b) => +new Date(a.date) - +new Date(b.date)),
@@ -63,7 +65,7 @@ export default function Compare({ store }: { store: WealthStore }) {
             <select value={aId} onChange={(e) => setAId(e.target.value)}>
               {ordered.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.label} · {fmtDate(s.date)}
+                  {s.label} · {fmtDate(s.date, mobile)}
                 </option>
               ))}
             </select>
@@ -74,7 +76,7 @@ export default function Compare({ store }: { store: WealthStore }) {
             <select value={bId} onChange={(e) => setBId(e.target.value)}>
               {ordered.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.label} · {fmtDate(s.date)}
+                  {s.label} · {fmtDate(s.date, mobile)}
                 </option>
               ))}
             </select>

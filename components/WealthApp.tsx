@@ -12,16 +12,9 @@ import Editor from "@/components/Editor";
 import Snapshots from "@/components/Snapshots";
 import Compare from "@/components/Compare";
 import Evolution from "@/components/Evolution";
+import TabNav from "@/components/TabNav";
+import ThemeToggle from "@/components/ThemeToggle";
 import { fmt, groupTotal } from "@/lib/utils";
-
-const TABS = [
-  { id: "dashboard", label: "Resumen", icon: "🥧" },
-  { id: "assets", label: "Clases", icon: "🧩" },
-  { id: "compare", label: "Comparar", icon: "⚖️" },
-  { id: "evolution", label: "Evolución", icon: "📈" },
-  { id: "snapshots", label: "Snapshots", icon: "📸" },
-  { id: "editor", label: "Editar", icon: "✏️" },
-] as const;
 
 export default function WealthApp({ signOutAction }: { signOutAction: () => Promise<void> }) {
   const store = useWealthData();
@@ -43,21 +36,11 @@ export default function WealthApp({ signOutAction }: { signOutAction: () => Prom
             <div className="brand-total">{fmt(total)}</div>
           </div>
         </div>
-        <nav className="tabs">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              className={"tab" + (tab === t.id ? " active" : "")}
-              onClick={() => setTab(t.id)}
-            >
-              <span className="tab-icon">{t.icon}</span>
-              {t.label}
-            </button>
-          ))}
-        </nav>
+        <TabNav tab={tab} onSelect={setTab} variant="tabs" />
         <div className="session">
           {store.saving && <span className="saving">Guardando…</span>}
           {store.user && <span className="session-email">{store.user.email}</span>}
+          <ThemeToggle />
           <form action={signOutAction}>
             <button className="btn ghost sm" type="submit">
               Salir
@@ -77,6 +60,9 @@ export default function WealthApp({ signOutAction }: { signOutAction: () => Prom
         {tab === "snapshots" && <Snapshots store={store} />}
         {tab === "editor" && <Editor store={store} />}
       </main>
+
+      {/* En móvil las 6 pestañas no caben en la cabecera: pasan a barra inferior. */}
+      <TabNav tab={tab} onSelect={setTab} variant="tabbar" />
     </div>
   );
 }

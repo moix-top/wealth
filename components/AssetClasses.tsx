@@ -3,12 +3,14 @@
 import { useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { fmt, ASSET_CLASSES, ASSET_ORDER, assetClassOf } from "@/lib/utils";
-import { tooltipStyle } from "@/components/Dashboard";
+import { tooltipStyle, tooltipWrapperStyle, donutHeight } from "@/components/Dashboard";
+import { useIsMobile } from "@/lib/useMediaQuery";
 import type { AssetClassKey } from "@/lib/types";
 import type { WealthStore } from "@/lib/store";
 
 export default function AssetClasses({ store }: { store: WealthStore }) {
   const { groups } = store.data!;
+  const mobile = useIsMobile();
 
   const { slices, total } = useMemo(() => {
     const sums = {} as Record<AssetClassKey, number>;
@@ -35,14 +37,14 @@ export default function AssetClasses({ store }: { store: WealthStore }) {
           <span className="muted">Distribución por clase de activo</span>
         </div>
         <div className="donut-wrap">
-          <ResponsiveContainer width="100%" height={360}>
+          <ResponsiveContainer width="100%" height={donutHeight(mobile)}>
             <PieChart>
               <Pie
                 data={slices}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={95}
-                outerRadius={140}
+                innerRadius="62%"
+                outerRadius="92%"
                 paddingAngle={2}
                 stroke="var(--surface-1)"
                 strokeWidth={2}
@@ -54,6 +56,8 @@ export default function AssetClasses({ store }: { store: WealthStore }) {
               <Tooltip
                 formatter={(v: number, n: string) => [fmt(v), n]}
                 contentStyle={tooltipStyle}
+                wrapperStyle={tooltipWrapperStyle}
+                allowEscapeViewBox={{ x: false, y: true }}
               />
             </PieChart>
           </ResponsiveContainer>

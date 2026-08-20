@@ -78,13 +78,13 @@ function GroupCard({ g, color, store }: { g: Group; color: string; store: Wealth
         </button>
       </div>
 
-      <table className="sub-table">
-        <tbody>
-          {g.subgroups.map((s) => (
-            <SubRow key={s.id} gid={g.id} s={s} store={store} />
-          ))}
-        </tbody>
-      </table>
+      {/* Antes una <table> con columnas de ancho fijo (350px), que no cabían en
+          móvil. Rejilla: mismas columnas en escritorio, apilada en pantalla estrecha. */}
+      <div className="sub-list" role="table" aria-label={`Partidas de ${g.name}`}>
+        {g.subgroups.map((s) => (
+          <SubRow key={s.id} gid={g.id} s={s} store={store} />
+        ))}
+      </div>
 
       <div className="sub-add">
         <input
@@ -97,6 +97,7 @@ function GroupCard({ g, color, store }: { g: Group; color: string; store: Wealth
         <input
           className="input amount"
           type="number"
+          inputMode="decimal"
           step="0.01"
           placeholder="0,00 €"
           value={newAmount}
@@ -116,20 +117,22 @@ function SubRow({ gid, s, store }: { gid: string; s: Subgroup; store: WealthStor
   const [amount, setAmount] = useState(String(s.amount));
 
   return (
-    <tr>
-      <td>
+    <div className="sub-row" role="row">
+      <div className="sub-cell name-cell" role="cell">
         <input
           className="input flush"
+          aria-label="Nombre de la partida"
           value={name}
           onChange={(e) => setName(e.target.value)}
           onBlur={() => {
             if (name.trim() && name !== s.name) store.updateSubgroup(gid, s.id, { name: name.trim() });
           }}
         />
-      </td>
-      <td className="class-cell">
+      </div>
+      <div className="sub-cell class-cell" role="cell">
         <select
           className="class-select"
+          aria-label="Clase de activo"
           value={assetClassOf(s)}
           onChange={(e) =>
             store.updateSubgroup(gid, s.id, { assetClass: e.target.value as AssetClassKey })
@@ -141,12 +144,14 @@ function SubRow({ gid, s, store }: { gid: string; s: Subgroup; store: WealthStor
             </option>
           ))}
         </select>
-      </td>
-      <td className="amount-cell">
+      </div>
+      <div className="sub-cell amount-cell" role="cell">
         <input
           className="input flush amount"
           type="number"
+          inputMode="decimal"
           step="0.01"
+          aria-label="Importe"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           onBlur={() => {
@@ -155,17 +160,18 @@ function SubRow({ gid, s, store }: { gid: string; s: Subgroup; store: WealthStor
           }}
         />
         <span className="euro">€</span>
-      </td>
-      <td className="row-actions">
+      </div>
+      <div className="sub-cell row-actions" role="cell">
         <button
           className="btn danger ghost sm"
+          aria-label={`Eliminar ${s.name}`}
           onClick={() => {
             if (confirm(`¿Eliminar "${s.name}"?`)) store.removeSubgroup(gid, s.id);
           }}
         >
           ✕
         </button>
-      </td>
-    </tr>
+      </div>
+    </div>
   );
 }
