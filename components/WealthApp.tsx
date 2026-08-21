@@ -14,6 +14,7 @@ import Compare from "@/components/Compare";
 import Evolution from "@/components/Evolution";
 import TabNav from "@/components/TabNav";
 import ThemeToggle from "@/components/ThemeToggle";
+import SiteFooter from "@/components/SiteFooter";
 import { fmt, groupTotal } from "@/lib/utils";
 
 export default function WealthApp({ signOutAction }: { signOutAction: () => Promise<void> }) {
@@ -78,6 +79,8 @@ export default function WealthApp({ signOutAction }: { signOutAction: () => Prom
         {tab === "snapshots" && <Snapshots store={store} />}
         {tab === "editor" && <Editor store={store} />}
       </main>
+
+      <SiteFooter />
 
       {/* En móvil las 6 pestañas no caben en la cabecera: pasan a barra inferior. */}
       <TabNav tab={tab} onSelect={setTab} variant="tabbar" />

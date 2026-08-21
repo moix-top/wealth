@@ -10,6 +10,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { DEMO_PROFILES } from "@/lib/demo/profiles";
+import SiteFooter from "@/components/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +69,8 @@ export default async function LoginPage({
           Ver una demo sin registrarse
         </Link>
       </div>
+
+      <SiteFooter />
     </div>
   );
 }
@@ -120,6 +123,8 @@ function DemoCatalog({ error, callbackUrl }: { error: string | null; callbackUrl
           ← Volver
         </Link>
       </div>
+
+      <SiteFooter />
     </div>
   );
 }
