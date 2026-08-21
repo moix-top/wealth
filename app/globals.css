@@ -139,6 +139,22 @@ body {
 .tab-icon { font-size: 0.95rem; }
 .saving { color: var(--muted); font-size: 0.8rem; }
 
+/* Pie de contacto, compartido por el login y la app. Solo tokens: así vale para
+   claro y oscuro sin un bloque de tema aparte. */
+.site-footer {
+  margin-top: var(--sp-6);
+  padding: var(--sp-4) 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+.site-footer p { margin: 0; }
+.site-footer a { color: var(--accent); }
+/* En el login el pie es un flex item: sin ancho propio el borde superior solo
+   mediría lo que el texto. Se alinea con la tarjeta. */
+.login-wrap .site-footer { width: 100%; max-width: 420px; }
+
 /* Barra de pestañas inferior: oculta en escritorio, ver bloque de móvil. */
 .tabbar { display: none; }
 
@@ -328,7 +344,12 @@ select {
 .banner.error { background: rgba(208, 59, 59, 0.1); color: var(--down); border-color: rgba(208, 59, 59, 0.25); }
 
 /* Login */
-.login-wrap { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: var(--sp-4); }
+/* Columna para que el pie de contacto quede debajo de la tarjeta, no al lado. */
+.login-wrap {
+  min-height: 100dvh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: var(--sp-4);
+  padding: var(--sp-4);
+}
 .login-card {
   background: var(--surface-1); border: 1px solid var(--border);
   border-radius: var(--radius); box-shadow: var(--shadow);
